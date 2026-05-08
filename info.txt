@@ -1,0 +1,7 @@
+Bei dem Spiel handelt es sich um Hnefatafl, ein strategisches Brettspiel der Wikinger. Du übernimmst die Rolle des Verteidigers, der einen König und 12 Soldaten in der Mitte des 11x11-Bretts kontrolliert. Dein Gegner ist eine computergesteuerte KI, die mit 24 Angreifern von den Rändern aus startet.
+
+Dein Ziel als Verteidiger ist es, den König sicher in eine der vier Ecken des Spielfelds zu bringen. Das Ziel der KI als Angreifer ist es, den König zu fangen, bevor er entkommt.
+
+Alle Figuren bewegen sich beliebig weit horizontal oder vertikal, ähnlich wie ein Turm im Schach. Eine normale Figur wird geschlagen, indem sie von zwei gegnerischen Figuren auf einer Linie eingeklemmt wird. Der König ist mächtiger und muss von vier Angreifern umzingelt werden, um geschlagen zu werden.
+
+Es ist ein asymmetrisches Spiel, das strategische Voraussicht und geschicktes Manövrieren erfordert.
