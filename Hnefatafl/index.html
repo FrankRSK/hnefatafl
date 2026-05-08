@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hnefatafl - Das Wikinger Brettspiel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c1810, #4a3426);
+            color: #f4e4c1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .title {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            color: #d4af37;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            text-align: center;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 600px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid #8b4513;
+        }
+
+        .player-info {
+            text-align: center;
+            flex: 1;
+        }
+
+        .current-turn {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #d4af37;
+        }
+
+        .board-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            padding: 20px;
+            border: 3px solid #8b4513;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            grid-template-rows: repeat(11, 1fr);
+            gap: 2px;
+            background: #4a3426;
+            border: 3px solid #654321;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            background: #d2b48c;
+            border: 1px solid #8b7355;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .cell:hover {
+            background: #e6d3aa;
+            transform: scale(1.05);
+        }
+
+        .cell.throne {
+            background: radial-gradient(circle, #ffd700, #daa520);
+            border: 2px solid #b8860b;
+        }
+
+        .cell.corner {
+            background: radial-gradient(circle, #8b4513, #654321);
+            border: 2px solid #4a2c17;
+        }
+
+        .cell.selected {
+            background: #90ee90 !important;
+            box-shadow: 0 0 15px #32cd32;
+            transform: scale(1.1);
+        }
+
+        .cell.valid-move {
+            background: #add8e6 !important;
+            box-shadow: 0 0 10px #4169e1;
+        }
+
+        .piece {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
+        }
+
+        .piece.moving {
+            transform: scale(1.2);
+            z-index: 20;
+        }
+
+        .defender {
+            background: radial-gradient(circle, #f5f5dc, #ddd);
+            border: 2px solid #888;
+            color: #333;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .attacker {
+            background: radial-gradient(circle, #333, #111);
+            border: 2px solid #444;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        .king {
+            background: radial-gradient(circle, #ffd700, #daa520);
+            border: 3px solid #b8860b;
+            color: #8b4513;
+            font-size: 16px;
+            width: 35px;
+            height: 35px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #8b4513, #654321);
+            color: #f4e4c1;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid #5d4037;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #a0522d, #8b4513);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 10px 0;
+            min-height: 30px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            border: 1px solid #8b4513;
+        }
+
+        .victory-message {
+            color: #d4af37;
+            font-weight: bold;
+            font-size: 1.5em;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #d4af37; }
+            to { text-shadow: 0 0 20px #d4af37, 0 0 30px #d4af37; }
+        }
+
+        .sound-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .sound-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #8b4513;
+            color: #f4e4c1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .muted {
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .cell {
+                width: 30px;
+                height: 30px;
+            }
+            .piece {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+            .king {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
+            .title {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sound-controls">
+        <button class="sound-btn" id="muteBtn" title="Sound an/aus">🔊</button>
+    </div>
+
+    <div class="game-container">
+        <h1 class="title">⚔️ HNEFATAFL ⚔️</h1>
+        <p class="subtitle">Das strategische Wikinger-Brettspiel</p>
+        
+        <div class="game-info">
+            <div class="player-info">
+                <div>Verteidiger (Du)</div>
+                <div>👑 Figuren: <span id="defenderCount">13</span></div>
+            </div>
+            <div class="player-info">
+                <div class="current-turn" id="currentPlayer">Angreifer am Zug</div>
+            </div>
+            <div class="player-info">
+                <div>Angreifer (KI)</div>
+                <div>⚔️ Figuren: <span id="attackerCount">24</span></div>
+            </div>
+        </div>
+
+        <div class="message" id="gameMessage">Die Angreifer beginnen. KI denkt nach...</div>
+
+        <div class="board-container">
+            <div class="board" id="gameBoard"></div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="newGame()">Neues Spiel</button>
+            <button class="btn" onclick="showRules()">Spielregeln</button>
+            <button class="btn" onclick="undoMove()" id="undoBtn">Zug zurück</button>
+        </div>
+    </div>
+
+    <script>
+        // Globale Variablen
+        let board = [];
+        let currentPlayer = 'attacker';
+        let selectedPiece = null;
+        let gameOver = false;
+        let moveHistory = [];
+        let soundEnabled = true;
+        let audioContext;
+        let sounds = {};
+
+        // Spielfiguren-Typen
+        const EMPTY = 0;
+        const ATTACKER = 1;
+        const DEFENDER = 2;
+        const KING = 3;
+
+        // Spezielle Felder
+        const THRONE = [5, 5];
+        const CORNERS = [[0, 0], [0, 10], [10, 0], [10, 10]];
+
+        // HILFSFUNKTIONEN ZUERST DEFINIEREN
+        function findKing() {
+            for (let row = 0; row < 11; row++) {
+                for (let col = 0; col < 11; col++) {
+                    if (board[row][col] === KING) {
+                        return { row, col };
+                    }
+                }
+            }
+            return null;
+        }
+
+        function isCorner(row, col) {
+            return CORNERS.some(([r, c]) => r === row && c === col);
+        }
+
+        function canOccupy(row, col, pieceType) {
+            if (row === 5 && col === 5 && pieceType !== KING) return false;
+            if (isCorner(row, col) && pieceType !== KING) return false;
+            return true;
+        }
+
+        function countPieces(type) {
+            let count = 0;
+            for (let row = 0; row < 11; row++) {
+                for (let col = 0; col < 11; col++) {
+                    if (board[row][col] === type) count++;
+                }
+            }
+            return count;
+        }
+
+        // AUDIO FUNKTIONEN
+        function createAudioContext() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                createSounds();
+            } catch (e) {
+                console.log('Audio nicht verfügbar');
+                soundEnabled = false;
+            }
+        }
+
+        function createSounds() {
+            sounds.move = createTone(220, 0.1, 'sine');
+            sounds.capture = createTone(330, 0.2, 'square');
+            sounds.victory = createTone(440, 0.5, 'triangle');
+            sounds.error = createTone(150, 0.1, 'sawtooth');
+        }
+
+        function createTone(frequency, duration, type) {
+            return () => {
+                if (!soundEnabled || !audioContext) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            };
+        }
+
+        function playSound(soundName) {
+            if (sounds[soundName]) {
+                sounds[soundName]();
+            }
+        }
+
+        // BRETT FUNKTIONEN
+        function createBoard() {
+            const boardElement = document.getElementById('gameBoard');
+            boardElement.innerHTML = '';
+            
+            board = Array(11).fill().map(() => Array(11).fill(EMPTY));
+            
+            for (let row = 0; row < 11; row++) {
+                for (let col = 0; col < 11; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    
+                    if (row === 5 && col === 5) {
+                        cell.classList.add('throne');
+                    } else if (isCorner(row, col)) {
+                        cell.classList.add('corner');
+                    }
+                    
+                    cell.addEventListener('click', handleCellClick);
+                    boardElement.appendChild(cell);
+                }
+            }
+        }
+
+        function updateDisplay() {
+            for (let row = 0; row < 11; row++) {
+                for (let col = 0; col < 11; col++) {
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    const piece = cell.querySelector('.piece');
+                    
+                    if (piece) {
+                        piece.remove();
+                    }
+                    
+                    if (board[row][col] !== EMPTY) {
+                        const pieceElement = document.createElement('div');
+                        pieceElement.className = 'piece';
+                        
+                        switch (board[row][col]) {
+                            case ATTACKER:
+                                pieceElement.classList.add('attacker');
+                                pieceElement.textContent = '⚔️';
+                                break;
+                            case DEFENDER:
+                                pieceElement.classList.add('defender');
+                                pieceElement.textContent = '🛡️';
+                                break;
+                            case KING:
+                                pieceElement.classList.add('king');
+                                pieceElement.textContent = '👑';
+                                break;
+                        }
+                        
+                        cell.appendChild(pieceElement);
+                    }
+                }
+            }
+            
+            updatePlayerInfo();
+        }
+
+        function updatePlayerInfo() {
+            const defenderCount = countPieces(DEFENDER) + countPieces(KING);
+            const attackerCount = countPieces(ATTACKER);
+            
+            document.getElementById('defenderCount').textContent = defenderCount;
+            document.getElementById('attackerCount').textContent = attackerCount;
+            
+            const currentPlayerElement = document.getElementById('currentPlayer');
+            if (currentPlayer === 'attacker') {
+                currentPlayerElement.textContent = 'Angreifer am Zug (KI)';
+            } else {
+                currentPlayerElement.textContent = 'Verteidiger am Zug (Du)';
+            }
+        }
+
+        // BEWEGUNGS FUNKTIONEN
+        function getValidMoves(row, col) {
+            const moves = [];
+            const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+            
+            directions.forEach(([dr, dc]) => {
+                let newRow = row + dr;
+                let newCol = col + dc;
+                
+                while (newRow >= 0 && newRow < 11 && newCol >= 0 && newCol < 11) {
+                    if (board[newRow][newCol] !== EMPTY) break;
+                    if (canOccupy(newRow, newCol, board[row][col])) {
+                        moves.push([newRow, newCol]);
+                    }
+                    newRow += dr;
+                    newCol += dc;
+                }
+            });
+            
+            return moves;
+        }
+
+        function isValidMove(fromRow, fromCol, toRow, toCol) {
+            if (board[toRow][toCol] !== EMPTY) return false;
+            if (fromRow !== toRow && fromCol !== toCol) return false;
+            
+            const dr = toRow > fromRow ? 1 : toRow < fromRow ? -1 : 0;
+            const dc = toCol > fromCol ? 1 : toCol < fromCol ? -1 : 0;
+            
+            let checkRow = fromRow + dr;
+            let checkCol = fromCol + dc;
+            
+            while (checkRow !== toRow || checkCol !== toCol) {
+                if (board[checkRow][checkCol] !== EMPTY) return false;
+                checkRow += dr;
+                checkCol += dc;
+            }
+            
+            return canOccupy(toRow, toCol, board[fromRow][fromCol]);
+        }
+
+        // SCHLAG FUNKTIONEN
+        function checkCaptures(row, col) {
+            const captured = [];
+            const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+            const movingPiece = board[row][col];
+            
+            directions.forEach(([dr, dc]) => {
+                const targetRow = row + dr;
+                const targetCol = col + dc;
+                const supportRow = row + 2 * dr;
+                const supportCol = col + 2 * dc;
+                
+                if (targetRow >= 0 && targetRow < 11 && targetCol >= 0 && targetCol < 11 &&
+                    supportRow >= 0 && supportRow < 11 && supportCol >= 0 && supportCol < 11) {
+                    
+                    const targetPiece = board[targetRow][targetCol];
+                    const supportPiece = board[supportRow][supportCol];
+                    
+                    if (targetPiece !== EMPTY && targetPiece !== movingPiece &&
+                        (supportPiece === movingPiece || 
+                         (targetRow === 5 && targetCol === 5) ||
+                         isCorner(supportRow, supportCol))) {
+                        
+                        if (targetPiece === KING) {
+                            if (isKingCaptured(targetRow, targetCol)) {
+                                captured.push([targetRow, targetCol]);
+                            }
+                        } else {
+                            captured.push([targetRow, targetCol]);
+                        }
+                    }
+                }
+            });
+            
+            return captured;
+        }
+
+        function isKingCaptured(kingRow, kingCol) {
+            if ((kingRow === 5 && kingCol === 5) || isCorner(kingRow, kingCol)) {
+                return false;
+            }
+            
+            if (kingRow === 0 || kingRow === 10 || kingCol === 0 || kingCol === 10) {
+                let surroundingEnemies = 0;
+                const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+                
+                directions.forEach(([dr, dc]) => {
+                    const checkRow = kingRow + dr;
+                    const checkCol = kingCol + dc;
+                    
+                    if (checkRow >= 0 && checkRow < 11 && checkCol >= 0 && checkCol < 11) {
+                        if (board[checkRow][checkCol] === ATTACKER ||
+                            (checkRow === 5 && checkCol === 5) ||
+                            isCorner(checkRow, checkCol)) {
+                            surroundingEnemies++;
+                        }
+                    } else {
+                        surroundingEnemies++;
+                    }
+                });
+                
+                return surroundingEnemies >= 3;
+            } else {
+                let surroundingEnemies = 0;
+                const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+                
+                directions.forEach(([dr, dc]) => {
+                    const checkRow = kingRow + dr;
+                    const checkCol = kingCol + dc;
+                    
+                    if (board[checkRow][checkCol] === ATTACKER) {
+                        surroundingEnemies++;
+                    }
+                });
+                
+                return surroundingEnemies >= 4;
+            }
+        }
+
+        // SPIELENDE FUNKTIONEN
+        function isKingTrapped(kingRow, kingCol) {
+            // Prüfe nur wenn König nicht auf sicheren Feldern steht
+            if ((kingRow === 5 && kingCol === 5) || isCorner(kingRow, kingCol)) {
+                return false; // König ist sicher
+            }
+            
+            const moves = getValidMoves(kingRow, kingCol);
+            return moves.length === 0;
+        }
+
+        function checkGameEnd() {
+            // Prüfe ob König eine Ecke erreicht hat
+            for (let [row, col] of CORNERS) {
+                if (board[row][col] === KING) {
+                    endGame('Verteidiger gewinnen! Der König hat eine Ecke erreicht!');
+                    return true;
+                }
+            }
+            
+            // Prüfe ob König geschlagen wurde
+            let kingExists = false;
+            for (let row = 0; row < 11; row++) {
+                for (let col = 0; col < 11; col++) {
+                    if (board[row][col] === KING) {
+                        kingExists = true;
+                        break;
+                    }
+                }
+                if (kingExists) break;
+            }
+            
+            if (!kingExists) {
+                endGame('Angreifer gewinnen! Der König wurde gefangen genommen!');
+                return true;
+            }
+            
+            // Nur prüfen ob König gefangen ist wenn es der Zug der Verteidiger ist
+            // und sie keine gültigen Züge haben
+            if (currentPlayer === 'defender') {
+                const defenderMoves = getAllValidMoves('defender');
+                if (defenderMoves.length === 0) {
+                    endGame('Angreifer gewinnen! Der König ist gefangen!');
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        function endGame(message) {
+            gameOver = true;
+            updateMessage(message);
+            document.getElementById('gameMessage').classList.add('victory-message');
+            playSound('victory');
+            
+            setTimeout(() => {
+                if (message.includes('Verteidiger')) {
+                    updateMessage(message + ' 🎉 Gratulation! 🎉');
+                } else {
+                    updateMessage(message + ' 💀 Versuche es nochmal! 💀');
+                }
+            }, 2000);
+        }
+
+        function updateMessage(message) {
+            const messageElement = document.getElementById('gameMessage');
+            messageElement.textContent = message;
+            messageElement.classList.remove('victory-message');
+        }
+
+        // SPIELER INTERAKTION
+        function handleCellClick(event) {
+            if (gameOver || currentPlayer === 'attacker') return;
+            
+            const row = parseInt(event.currentTarget.dataset.row);
+            const col = parseInt(event.currentTarget.dataset.col);
+            
+            if (selectedPiece) {
+                if (isValidMove(selectedPiece.row, selectedPiece.col, row, col)) {
+                    makeMove(selectedPiece.row, selectedPiece.col, row, col);
+                    clearSelection();
+                } else {
+                    playSound('error');
+                    clearSelection();
+                }
+            } else {
+                if (board[row][col] === DEFENDER || board[row][col] === KING) {
+                    selectPiece(row, col);
+                }
+            }
+        }
+
+        function selectPiece(row, col) {
+            selectedPiece = { row, col };
+            
+            clearHighlights();
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            cell.classList.add('selected');
+            
+            highlightValidMoves(row, col);
+            playSound('move');
+        }
+
+        function clearSelection() {
+            selectedPiece = null;
+            clearHighlights();
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('selected', 'valid-move');
+            });
+        }
+
+        function highlightValidMoves(row, col) {
+            const moves = getValidMoves(row, col);
+            moves.forEach(([r, c]) => {
+                const cell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                cell.classList.add('valid-move');
+            });
+        }
+
+        function makeMove(fromRow, fromCol, toRow, toCol) {
+            const previousBoard = board.map(row => [...row]);
+            moveHistory.push({ board: previousBoard, player: currentPlayer });
+            
+            animateMove(fromRow, fromCol, toRow, toCol, () => {
+                board[toRow][toCol] = board[fromRow][fromCol];
+                board[fromRow][fromCol] = EMPTY;
+                
+                const captured = checkCaptures(toRow, toCol);
+                
+                if (captured.length > 0) {
+                    playSound('capture');
+                    captured.forEach(([r, c]) => {
+                        board[r][c] = EMPTY;
+                    });
+                } else {
+                    playSound('move');
+                }
+                
+                updateDisplay();
+                
+                if (checkGameEnd()) {
+                    return;
+                }
+                
+                currentPlayer = currentPlayer === 'attacker' ? 'defender' : 'attacker';
+                updatePlayerInfo();
+                
+                if (currentPlayer === 'attacker') {
+                    updateMessage("KI denkt nach...");
+                    setTimeout(() => makeAIMove(), 800);
+                } else {
+                    updateMessage("Du bist am Zug. Wähle eine Figur aus.");
+                }
+            });
+        }
+
+        function animateMove(fromRow, fromCol, toRow, toCol, callback) {
+            const fromCell = document.querySelector(`[data-row="${fromRow}"][data-col="${fromCol}"]`);
+            const toCell = document.querySelector(`[data-row="${toRow}"][data-col="${toCol}"]`);
+            const piece = fromCell.querySelector('.piece');
+            
+            if (!piece) {
+                callback();
+                return;
+            }
+            
+            const fromRect = fromCell.getBoundingClientRect();
+            const toRect = toCell.getBoundingClientRect();
+            
+            const dx = toRect.left - fromRect.left;
+            const dy = toRect.top - fromRect.top;
+            
+            piece.style.position = 'relative';
+            piece.style.zIndex = '100';
+            piece.style.transition = 'transform 0.5s ease-in-out';
+            piece.style.transform = `translate(${dx}px, ${dy}px)`;
+            
+            setTimeout(() => {
+                piece.style.position = '';
+                piece.style.zIndex = '';
+                piece.style.transition = '';
+                piece.style.transform = '';
+                callback();
+            }, 500);
+        }
+
+        // KI FUNKTIONEN
+        function makeAIMove() {
+            if (gameOver || currentPlayer !== 'attacker') return;
+            
+            const move = getBestMove();
+            if (move) {
+                makeMove(move.fromRow, move.fromCol, move.toRow, move.toCol);
+            } else {
+                endGame('Verteidiger gewinnen! Die Angreifer können nicht mehr ziehen!');
+            }
+        }
+
+        function getBestMove() {
+            const moves = getAllValidMoves('attacker');
+            if (moves.length === 0) return null;
+            
+            let bestMove = null;
+            let bestScore = -Infinity;
+            
+            moves.forEach(move => {
+                const score = evaluateMove(move);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = move;
+                }
+            });
+            
+            return bestMove;
+        }
+
+        function getAllValidMoves(player) {
+            const moves = [];
+            
+            for (let row = 0; row < 11; row++) {
+                for (let col = 0; col < 11; col++) {
+                    if (player === 'attacker' && board[row][col] === ATTACKER) {
+                        const validMoves = getValidMoves(row, col);
+                        validMoves.forEach(([toRow, toCol]) => {
+                            moves.push({ fromRow: row, fromCol: col, toRow, toCol });
+                        });
+                    } else if (player === 'defender' && 
+                              (board[row][col] === DEFENDER || board[row][col] === KING)) {
+                        const validMoves = getValidMoves(row, col);
+                        validMoves.forEach(([toRow, toCol]) => {
+                            moves.push({ fromRow: row, fromCol: col, toRow, toCol });
+                        });
+                    }
+                }
+            }
+            
+            return moves;
+        }
+
+        function evaluateMove(move) {
+            const originalPiece = board[move.toRow][move.toCol];
+            board[move.toRow][move.toCol] = board[move.fromRow][move.fromCol];
+            board[move.fromRow][move.fromCol] = EMPTY;
+            
+            let score = 0;
+            
+            const captured = checkCaptures(move.toRow, move.toCol);
+            captured.forEach(([r, c]) => {
+                if (board[r][c] === KING) {
+                    score += 1000;
+                } else if (board[r][c] === DEFENDER) {
+                    score += 50;
+                }
+            });
+            
+            const kingPos = findKing();
+            if (kingPos) {
+                const distanceToKing = Math.abs(move.toRow - kingPos.row) + 
+                                     Math.abs(move.toCol - kingPos.col);
+                score += Math.max(0, 10 - distanceToKing);
+                
+                if (isBlockingEscape(move.toRow, move.toCol, kingPos)) {
+                    score += 30;
+                }
+                
+                if (isSurroundingKing(move.toRow, move.toCol, kingPos)) {
+                    score += 40;
+                }
+            }
+            
+            const centerDistance = Math.abs(move.toRow - 5) + Math.abs(move.toCol - 5);
+            score += Math.max(0, 8 - centerDistance);
+            
+            board[move.fromRow][move.fromCol] = board[move.toRow][move.toCol];
+            board[move.toRow][move.toCol] = originalPiece;
+            
+            return score;
+        }
+
+        function isBlockingEscape(row, col, kingPos) {
+            for (let [cornerRow, cornerCol] of CORNERS) {
+                if (isOnPath(kingPos.row, kingPos.col, cornerRow, cornerCol, row, col)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function isOnPath(fromRow, fromCol, toRow, toCol, blockRow, blockCol) {
+            if (fromRow === toRow) {
+                if (blockRow === fromRow && 
+                    blockCol > Math.min(fromCol, toCol) && 
+                    blockCol < Math.max(fromCol, toCol)) {
+                    return true;
+                }
+            } else if (fromCol === toCol) {
+                if (blockCol === fromCol && 
+                    blockRow > Math.min(fromRow, toRow) && 
+                    blockRow < Math.max(fromRow, toRow)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function isSurroundingKing(row, col, kingPos) {
+            const distance = Math.abs(row - kingPos.row) + Math.abs(col - kingPos.col);
+            return distance === 1;
+        }
+
+        // SPIEL INITIALISIERUNG
+        function initializeGame() {
+            board = Array(11).fill().map(() => Array(11).fill(EMPTY));
+            
+            // König in die Mitte
+            board[5][5] = KING;
+            
+            // Verteidiger um den König
+            const defenderPositions = [
+                [3, 5], [4, 5], [6, 5], [7, 5], // vertikal
+                [5, 3], [5, 4], [5, 6], [5, 7], // horizontal
+                [4, 4], [4, 6], [6, 4], [6, 6]  // diagonal
+            ];
+            
+            defenderPositions.forEach(([row, col]) => {
+                board[row][col] = DEFENDER;
+            });
+            
+            // Angreifer an den Rändern
+            const attackerPositions = [
+                // Oben
+                [0, 3], [0, 4], [0, 5], [0, 6], [0, 7],
+                [1, 5],
+                // Unten
+                [10, 3], [10, 4], [10, 5], [10, 6], [10, 7],
+                [9, 5],
+                // Links
+                [3, 0], [4, 0], [5, 0], [6, 0], [7, 0],
+                [5, 1],
+                // Rechts
+                [3, 10], [4, 10], [5, 10], [6, 10], [7, 10],
+                [5, 9]
+            ];
+            
+            attackerPositions.forEach(([row, col]) => {
+                board[row][col] = ATTACKER;
+            });
+            
+            currentPlayer = 'attacker';
+            gameOver = false;
+            selectedPiece = null;
+            moveHistory = [];
+            
+            updateDisplay();
+            updateMessage("Die Angreifer beginnen. KI denkt nach...");
+            
+            setTimeout(() => makeAIMove(), 1000);
+        }
+
+        // HAUPT FUNKTIONEN
+        function newGame() {
+            initializeGame();
+        }
+
+        function showRules() {
+            const rules = `
+HNEFATAFL - SPIELREGELN
+
+🎯 ZIEL:
+• Verteidiger: König in eine Ecke bringen
+• Angreifer: König gefangen nehmen
+
+⚔️ SPIELABLAUF:
+• Angreifer beginnen (KI)
+• Abwechselnde Züge
+• Figuren bewegen sich orthogonal (nicht diagonal)
+• Unbegrenzte Reichweite bis zur nächsten Figur
+
+🏰 SCHLAGEN:
+• Figuren zwischen zwei Gegnern einklemmen
+• König braucht 4 Angreifer (oder 3 am Rand)
+• König ist sicher auf Thron und in Ecken
+
+🏛️ SPEZIELLE FELDER:
+• Thron (Mitte): Nur König darf betreten
+• Ecken: Nur König darf betreten, Sieg wenn erreicht
+
+✨ STEUERUNG:
+• Figur anklicken → gültige Züge werden gezeigt
+• Zielfeld anklicken → Zug ausführen
+• Blau: Gültige Züge | Grün: Ausgewählte Figur
+
+🎮 TASTATUR:
+• N: Neues Spiel
+• U: Zug zurück
+• R: Regeln
+• M: Sound an/aus
+• ESC: Auswahl abbrechen
+            `;
+            alert(rules);
+        }
+
+        function undoMove() {
+            if (moveHistory.length > 0 && currentPlayer === 'defender') {
+                const lastMove = moveHistory.pop();
+                board = lastMove.board;
+                currentPlayer = lastMove.player;
+                selectedPiece = null;
+                clearHighlights();
+                updateDisplay();
+                updateMessage("Zug rückgängig gemacht.");
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('muteBtn');
+            btn.textContent = soundEnabled ? '🔊' : '🔇';
+            btn.classList.toggle('muted', !soundEnabled);
+        }
+
+        function init() {
+            createAudioContext();
+            createBoard();
+            initializeGame();
+        }
+
+        // EVENT LISTENERS
+        document.getElementById('muteBtn').addEventListener('click', toggleSound);
+
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'n':
+                case 'N':
+                    newGame();
+                    break;
+                case 'u':
+                case 'U':
+                    undoMove();
+                    break;
+                case 'r':
+                case 'R':
+                    showRules();
+                    break;
+                case 'm':
+                case 'M':
+                    toggleSound();
+                    break;
+                case 'Escape':
+                    clearSelection();
+                    break;
+            }
+        });
+
+        function adjustBoardSize() {
+            const cells = document.querySelectorAll('.cell');
+            
+            if (window.innerWidth < 768) {
+                cells.forEach(cell => {
+                    cell.style.width = '30px';
+                    cell.style.height = '30px';
+                });
+            } else {
+                cells.forEach(cell => {
+                    cell.style.width = '40px';
+                    cell.style.height = '40px';
+                });
+            }
+        }
+
+        window.addEventListener('resize', adjustBoardSize);
+
+        // TOUCH SUPPORT
+        let touchStartX, touchStartY;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            if (!touchStartX || !touchStartY) return;
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            
+            const diffX = touchStartX - touchEndX;
+            const diffY = touchStartY - touchEndY;
+            
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                if (Math.abs(diffX) > 50) {
+                    // Swipe-Aktionen können hier implementiert werden
+                }
+            }
+            
+            touchStartX = null;
+            touchStartY = null;
+        });
+
+        // SPIEL STARTEN
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            adjustBoardSize();
+        });
+    </script>
+</body>
+</html>
